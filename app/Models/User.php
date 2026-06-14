@@ -10,7 +10,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable([
+    'first_name',
+    'last_name',
+    'email',
+    'mobile_number',
+    'password'
+])]
+
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,5 +35,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(StudentProfile::class);
+    }
+
+    public function onboardingProgress()
+    {
+        return $this->hasOne(OnboardingProgress::class);
+    }
+
+    public function otpVerification()
+    {
+        return $this->hasOne(OTPVerification::class);
     }
 }

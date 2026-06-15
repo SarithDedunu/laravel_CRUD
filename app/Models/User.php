@@ -36,7 +36,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
+// Eloquent Relationships -  One-to-One relationships with StudentProfile, OnboardingProgress, and OTPVerification models
     public function profile()
     {
         return $this->hasOne(StudentProfile::class);

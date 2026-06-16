@@ -7,6 +7,9 @@ use App\Models\OnboardingProgress;
 use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Mail\SendOtpMail;
+use App\Models\OTPVerification;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -22,23 +25,46 @@ class AuthController extends Controller
         ]);
 
 
-        // Step 1: Create the main account in the users table and get the new user's ID
+        // 1: Create the main account in the users table and get the new user's ID
         $user = User::create($validatedData);
 
-        // Step 2: Create a blank profile for this user, linked by their new ID
+        // 2. Generate OTP for email verification
+        $otp = $this->generateOTP();
+
+        // 3: Create a blank profile for this user, linked by their new ID
         StudentProfile::create([
             'user_id' => $user->id,
         ]);
 
-        // Step 3: Start a new onboarding checklist tracker for this user
+        // 4: Start a new onboarding checklist tracker for this user
         OnboardingProgress::create([
             'user_id' => $user->id,
         ]);
 
-        // Return a response to frontend
+
+        // 5: Store the OTP in the database with an expiration time
+        OTPVerification::create([
+            'user_id' => $user->id,
+            'otp_code' => $otp,
+            'expires_at' => now()->addMinutes(4), // OTP expires in 4 minutes
+        ]);
+
+        // 6: Send the OTP to the user's email
+        Mail::to($user->email)->send(new SendOtpMail($otp));
+
+        // 7:Return a response to frontend
         return response()->json([
             'success' => true,
-            'message' => 'User registered successfully',
-            'data' => $user], 201);
+            'message' => 'Registration successful. OTP Sent to email.',
+            'data' => [
+                'current_step' => 'otp_verification'
+            ]
+        ], 201);
+    }
+
+
+    public function generateOTP(): string
+    {
+        return strval(rand(100000, 999999)); // Generate a random 6-digit OTP
     }
 }

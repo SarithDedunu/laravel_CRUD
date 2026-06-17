@@ -6,6 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 
 // Registration endpoint
-Route::post('/register', [AuthController::class, 'register' 
-
-]);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOTP']);
+Route::post('/login', [AuthController::class, 'login']); 
